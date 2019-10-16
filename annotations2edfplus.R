@@ -31,7 +31,7 @@ edf_block_size_limit <- 61440# In bytes
 
 # Compute how many characters we will need to store
 writenChars <- 0
-num_necessary_blocks <- 1# At least one block is necessary
+num_necessary_blocks <- 1 # At least one block is necessary
 
 # Sort annotations before writing to file
 sortIndx <- order(annotations$offset)
@@ -54,7 +54,7 @@ for (k in 1:length(annotations$offset)){
     if (annotations$offset[k] >= 0){
       dataForThisAnnotation <- c(dataForThisAnnotation, c(charToRaw('+'), charToRaw(as.character(annotations$offset[k])), as.raw(21)));
     } else {
-      dataForThisAnnotation <- c(dataForThisAnnotation, c(charToRaw('-'), charToRaw(as.character(annotations$offset[k])), as.raw(21)));
+      dataForThisAnnotation <- c(dataForThisAnnotation, c(charToRaw(as.character(annotations$offset[k])), as.raw(21)));
     }
     
     # Note: Each duration finishes with unprintable ASCII '20'
@@ -75,8 +75,13 @@ for (k in 1:length(annotations$offset)){
         # Reset the "writtenChars" counter
         writenChars <- 0;
 
-        # A a new time-keeping TAL is inserted before the annotation
-        time_keep_tal <- as.raw(c(20,20,0));
+        # A a new time-keeping TAL is built, taking as reference the offset time of the curent annotation
+        if (annotations$offset[k] >= 0){
+          time_keep_tal <- c(charToRaw('+'), charToRaw(as.character(annotations$offset[k])), as.raw(c(20,20,0)));
+        } else {
+          time_keep_tal <- c(charToRaw(as.character(annotations$offset[k])), as.raw(c(20,20,0)));
+        }
+        # New time-keeping TAL is inserted preceding the annotation (first annotation of the new block)
         dataForThisAnnotation <- c(time_keep_tal, dataForThisAnnotation);
     }
 
